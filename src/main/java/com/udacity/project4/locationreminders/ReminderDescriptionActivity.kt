@@ -3,6 +3,7 @@ package com.udacity.project4.locationreminders
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import com.udacity.project4.R
@@ -31,6 +32,19 @@ class ReminderDescriptionActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         val layoutId = R.layout.activity_reminder_description
         binding = DataBindingUtil.setContentView(this, layoutId)
-        // TODO: Add the implementation of the reminder details
+
+        val reminderDataItem: ReminderDataItem = intent
+            .getSerializableExtra(EXTRA_ReminderDataItem) as ReminderDataItem
+        binding.reminderDataItem = reminderDataItem
+
+
+        val intent = Intent(this, RemindersActivity::class.java)
+        onBackPressedDispatcher.addCallback(this, object:
+            OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                startActivity(intent)
+            }
+
+        })
     }
 }
