@@ -7,6 +7,7 @@ import androidx.test.filters.LargeTest
 import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.local.LocalDB
 import com.udacity.project4.locationreminders.data.local.RemindersLocalRepository
+import com.udacity.project4.locationreminders.data.local.RemindersRepository
 import com.udacity.project4.locationreminders.reminderslist.RemindersListViewModel
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
 import kotlinx.coroutines.runBlocking
@@ -39,17 +40,15 @@ class RemindersActivityTest :
         val myModule = module {
             viewModel {
                 RemindersListViewModel(
-                    appContext,
-                    get() as ReminderDataSource
+                    get() as RemindersRepository
                 )
             }
             single {
                 SaveReminderViewModel(
-                    appContext,
-                    get() as ReminderDataSource
+                    get() as RemindersRepository
                 )
             }
-            single { RemindersLocalRepository(get()) as ReminderDataSource }
+            single <ReminderDataSource> { RemindersLocalRepository(get()) }
             single { LocalDB.createRemindersDao(appContext) }
         }
         //declare a new koin module
@@ -67,5 +66,6 @@ class RemindersActivityTest :
 
 
 //    TODO: add End to End testing to the app
+
 
 }
