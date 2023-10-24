@@ -3,7 +3,7 @@ package com.udacity.project4.locationreminders
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.OnBackPressedCallback
+import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import com.udacity.project4.R
@@ -39,12 +39,17 @@ class ReminderDescriptionActivity : AppCompatActivity() {
 
 
         val intent = Intent(this, RemindersActivity::class.java)
-        onBackPressedDispatcher.addCallback(this, object:
+
+        /*onBackPressedDispatcher.addCallback(this, object:
             OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 startActivity(intent)
             }
 
-        })
+        })*/
+
+        onBackPressedDispatcher.addCallback(this) {
+            startActivity(intent)
+        }
     }
 }
