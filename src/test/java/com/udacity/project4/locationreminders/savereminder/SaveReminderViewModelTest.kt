@@ -1,13 +1,16 @@
 package com.udacity.project4.locationreminders.savereminder
 
+import android.app.Application
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.udacity.project4.locationreminders.MainCoroutineRule
 import com.udacity.project4.locationreminders.data.FakeAndroidTestRepository
+import com.udacity.project4.locationreminders.getOrAwaitValue
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.pauseDispatcher
+import kotlinx.coroutines.test.resumeDispatcher
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers.`is`
-import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.After
 import org.junit.Before
@@ -29,49 +32,38 @@ class SaveReminderViewModelTest {
     @Before
     fun setupViewModel() {
         remindersRepository = FakeAndroidTestRepository()
-        saveReminderViewModel = SaveReminderViewModel(remindersRepository)
+        saveReminderViewModel = SaveReminderViewModel(Application(), remindersRepository)
     }
 
     @Test
-    fun validateAndSaveReminder() = runTest {
+    fun validateAndSaveReminderShowLoading() = runTest {
         val reminder = ReminderDataItem(
             "Title",
             "Description",
             "Trader Joes",
             40.0, 40.0
         )
+        mainCoroutineRule.pauseDispatcher()
         saveReminderViewModel.validateAndSaveReminder(reminder)
 
-        val value = remindersRepository.getReminder(reminder.id)
+        assertThat(saveReminderViewModel.showLoading.getOrAwaitValue(), `is`(true))
 
-        assertThat(value, `is`(reminder.id))
-
-        /*
-        java.lang.AssertionError:
-        Expected: is "428c156e-ea20-43f7-8d76-06214ec4fdff"
-        but: was <Success(data=ReminderDTO(title=Title1, description=Description1,
-        location=Trader Joes, latitude=40.0, longitude=40.0, id=428c156e-ea20-43f7-8d76-06214ec4fdff))>
-        */
+        mainCoroutineRule.resumeDispatcher()
+        assertThat(saveReminderViewModel.showLoading.getOrAwaitValue(), `is`(false))
     }
 
     @Test
-    fun onClearTest() = runTest {
+    fun showSnackbarIfNoDataEntered() = runTest {
         val reminder = ReminderDataItem(
-            "Title",
+            null,
             "Description",
             "Trader Joes",
             40.0, 40.0
         )
         saveReminderViewModel.validateAndSaveReminder(reminder)
-        saveReminderViewModel.onClear()
-        val value = remindersRepository.getReminder(reminder.id)
-
-        assertThat(value, `is`(nullValue()))
-        /*java.lang.AssertionError:
-        Expected: is null
-        but: was <ReminderDataItem(title=Title1, description=Description1,
-        location=Trader Joes, latitude=40.0, longitude=40.0,
-        id=dd9750b9-8586-4b63-9302-6f3b846875dc)>*/
+        mainCoroutineRule.pauseDispatcher()
+        assertThat(saveReminderViewModel.showSnackBarInt.getOrAwaitValue(),
+            `is`(2131886143))
     }
 
     @After

@@ -1,14 +1,15 @@
 package com.udacity.project4.locationreminders.reminderslist
 
+import android.app.Application
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.udacity.project4.base.BaseViewModel
+import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.data.dto.Result
-import com.udacity.project4.locationreminders.data.local.RemindersRepository
 import kotlinx.coroutines.launch
 
-class RemindersListViewModel(private val repository: RemindersRepository) : BaseViewModel() {
+class RemindersListViewModel(app: Application, private val dataSource: ReminderDataSource) : BaseViewModel(app) {
     // list that holds the reminder data to be displayed on the UI
     val remindersList = MutableLiveData<List<ReminderDataItem>>()
 
@@ -20,7 +21,7 @@ class RemindersListViewModel(private val repository: RemindersRepository) : Base
         showLoading.value = true
         viewModelScope.launch {
             //interacting with the dataSource has to be through a coroutine
-            val result = repository.getReminders()
+            val result = dataSource.getReminders()
             showLoading.postValue(false)
             when (result) {
                 is Result.Success<*> -> {
@@ -42,7 +43,6 @@ class RemindersListViewModel(private val repository: RemindersRepository) : Base
                 is Result.Error ->
                     showSnackBar.value = result.message
             }
-
             //check if no data has to be shown
             invalidateShowNoData()
         }

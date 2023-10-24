@@ -6,8 +6,10 @@ import com.udacity.project4.locationreminders.MainCoroutineRule
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.data.local.RemindersLocalRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
+import org.junit.Test
 import org.junit.runner.RunWith
 
 @ExperimentalCoroutinesApi
@@ -50,12 +52,12 @@ class RemindersLocalRepositoryTest {
 
     }
 
-    /*@ExperimentalCoroutinesApi
+    @ExperimentalCoroutinesApi
     @Test
-    fun get() = mainCoroutineRule.runTest {
-        val remidners = remindersRepository.
+    fun get() = runTest {
+        //val remidners = remindersRepository.
 
-    }*/
+    }
 
 
 

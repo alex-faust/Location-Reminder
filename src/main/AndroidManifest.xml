@@ -29,7 +29,6 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="${MAPS_API_KEY}" />
 
-        <activity android:name=".locationreminders.ReminderDescriptionActivity" />
         <activity android:name=".authentication.AuthenticationActivity" />
         <activity
             android:name=".locationreminders.RemindersActivity"

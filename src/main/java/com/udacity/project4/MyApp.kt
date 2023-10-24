@@ -24,6 +24,7 @@ class MyApp : Application() {
 			//Declare a ViewModel - be later inject into Fragment with dedicated injector using by viewModel()
 			viewModel {
 				RemindersListViewModel(
+					get(),
 					get() as RemindersRepository
 				)
 			}
@@ -31,11 +32,14 @@ class MyApp : Application() {
 			single {
 				//This view model is declared singleton to be used across multiple fragments
 				SaveReminderViewModel(
+					get(),
 					get() as RemindersRepository
 				)
 			}
 			single<ReminderDataSource> { RemindersLocalRepository(get()) }
 			single { LocalDB.createRemindersDao(this@MyApp) }
+
+
 		}
 
 		startKoin {

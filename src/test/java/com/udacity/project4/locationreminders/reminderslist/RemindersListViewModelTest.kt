@@ -1,11 +1,14 @@
 package com.udacity.project4.locationreminders.reminderslist
 
+import android.app.Application
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.udacity.project4.locationreminders.MainCoroutineRule
 import com.udacity.project4.locationreminders.data.FakeAndroidTestRepository
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.getOrAwaitValue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.pauseDispatcher
+import kotlinx.coroutines.test.resumeDispatcher
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.not
@@ -50,27 +53,35 @@ class RemindersListViewModelTest {
             40.0, 40.0
         )
         remindersRepository.addReminders(reminder1, reminder2, reminder3)
-        remindersListViewModel = RemindersListViewModel(remindersRepository)
-        //remindersListViewModel.remindersList.value =
+        remindersListViewModel = RemindersListViewModel(Application(), remindersRepository)
     }
 
     @Test
     fun addNewReminder_setsNewReminderEvent() {
         remindersListViewModel.loadReminders()
-
         val value = remindersListViewModel.remindersList.getOrAwaitValue()
 
         assertThat(value, not(nullValue()))
     }
 
     @Test
-    fun showNoDataTest() = runTest {
+    fun checkLoadingWhenWaitingToLoadReminders() {
+        mainCoroutineRule.pauseDispatcher()
+        remindersListViewModel.loadReminders()
+
+        assertThat(remindersListViewModel.showLoading.getOrAwaitValue(), `is`(true))
+        mainCoroutineRule.resumeDispatcher()
+
+        assertThat(remindersListViewModel.showLoading.getOrAwaitValue(), `is`(true))
+    }
+
+    @Test
+    fun showErrorWhenNoRemindersToLoad() = runTest {
+        remindersListViewModel.loadReminders()
         remindersRepository.deleteAllReminders()
-        remindersListViewModel.invalidateShowNoData()
+        remindersListViewModel.loadReminders()
 
-        val value = remindersListViewModel.remindersList.getOrAwaitValue()
-
-        assertThat(value, `is`(nullValue()))
+        assertThat(remindersListViewModel.showNoData.getOrAwaitValue(), `is`(true))
     }
 
     @After

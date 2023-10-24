@@ -8,11 +8,10 @@ import android.widget.Button
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.firebase.ui.auth.AuthUI
-import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.firebase.ui.auth.IdpResponse
-import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.google.firebase.auth.FirebaseAuth
 import com.udacity.project4.R
 import com.udacity.project4.locationreminders.RemindersActivity
@@ -25,12 +24,14 @@ class AuthenticationActivity : AppCompatActivity() {
 
     private lateinit var registerForActivityResult: ActivityResultLauncher<Intent>
 
+    private val viewModel by viewModels<AuthenticationViewModel>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+
         setContentView(R.layout.activity_authentication)
 
-        //registerForSignInResult()
 
         val loginButton = findViewById<Button>(R.id.loginButton)
 
@@ -53,10 +54,15 @@ class AuthenticationActivity : AppCompatActivity() {
         val providers = arrayListOf(
             AuthUI.IdpConfig.EmailBuilder().build(), AuthUI.IdpConfig.GoogleBuilder().build()
         )
-        registerForActivityResult.launch(AuthUI.getInstance()
+        startActivityForResult(AuthUI.getInstance()
             .createSignInIntentBuilder()
             .setAvailableProviders(providers)
-            .build())
+            .build(), SIGN_IN_RESULT_CODE)
+
+        /*registerForActivityResult.launch(AuthUI.getInstance()
+            .createSignInIntentBuilder()
+            .setAvailableProviders(providers)
+            .build())*/
 
     }
     private fun registerForSignInResult() {

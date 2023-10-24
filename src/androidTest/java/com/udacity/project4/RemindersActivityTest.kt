@@ -7,10 +7,10 @@ import androidx.test.filters.LargeTest
 import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.local.LocalDB
 import com.udacity.project4.locationreminders.data.local.RemindersLocalRepository
-import com.udacity.project4.locationreminders.data.local.RemindersRepository
 import com.udacity.project4.locationreminders.reminderslist.RemindersListViewModel
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
 import kotlinx.coroutines.runBlocking
+import org.junit.After
 import org.junit.Before
 import org.junit.runner.RunWith
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -40,12 +40,14 @@ class RemindersActivityTest :
         val myModule = module {
             viewModel {
                 RemindersListViewModel(
-                    get() as RemindersRepository
+                    get(),
+                    get() as ReminderDataSource
                 )
             }
             single {
                 SaveReminderViewModel(
-                    get() as RemindersRepository
+                    get(),
+                    get() as ReminderDataSource
                 )
             }
             single <ReminderDataSource> { RemindersLocalRepository(get()) }
@@ -64,8 +66,29 @@ class RemindersActivityTest :
         }
     }
 
+    @After
+    fun tearDown() {
+        stopKoin()
+    }
 
 //    TODO: add End to End testing to the app
+    //launch the activity
+    //click on the fab button
+    //add a reminder to the database
+/*
+    @Before
+    fun setup() {
+        //val activityScenario = ActivityScenario.launch(RemindersActivity::class.java)
+    }
+
+    @Test
+    fun test() {
+        val activityScenario = ActivityScenario.launch(RemindersActivity::class.java)
+
+        Thread.sleep(5000)
+        activityScenario.close()
+
+    }*/
 
 
 }
