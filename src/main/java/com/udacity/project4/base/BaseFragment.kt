@@ -41,6 +41,4 @@ abstract class BaseFragment : Fragment() {
             }
         }
     }
-
-
 }

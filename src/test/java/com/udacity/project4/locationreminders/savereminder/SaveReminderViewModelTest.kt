@@ -1,9 +1,9 @@
 package com.udacity.project4.locationreminders.savereminder
 
-import android.app.Application
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.udacity.project4.locationreminders.MainCoroutineRule
-import com.udacity.project4.locationreminders.data.FakeAndroidTestRepository
+import com.udacity.project4.locationreminders.data.FakeTestRepository
 import com.udacity.project4.locationreminders.getOrAwaitValue
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -24,15 +24,16 @@ import org.koin.core.context.stopKoin
 class SaveReminderViewModelTest {
 
     @get:Rule
-    var  mainCoroutineRule = MainCoroutineRule()
+    var mainCoroutineRule = MainCoroutineRule()
 
-    private lateinit var remindersRepository: FakeAndroidTestRepository
+    private lateinit var remindersRepository: FakeTestRepository
     private lateinit var saveReminderViewModel: SaveReminderViewModel
 
     @Before
     fun setupViewModel() {
-        remindersRepository = FakeAndroidTestRepository()
-        saveReminderViewModel = SaveReminderViewModel(Application(), remindersRepository)
+        remindersRepository = FakeTestRepository()
+        saveReminderViewModel = SaveReminderViewModel(
+            ApplicationProvider.getApplicationContext(), remindersRepository)
     }
 
     @Test
@@ -52,6 +53,7 @@ class SaveReminderViewModelTest {
         assertThat(saveReminderViewModel.showLoading.getOrAwaitValue(), `is`(false))
     }
 
+    //should return error snackbar
     @Test
     fun showSnackbarIfNoDataEntered() = runTest {
         val reminder = ReminderDataItem(
@@ -63,7 +65,7 @@ class SaveReminderViewModelTest {
         saveReminderViewModel.validateAndSaveReminder(reminder)
         mainCoroutineRule.pauseDispatcher()
         assertThat(saveReminderViewModel.showSnackBarInt.getOrAwaitValue(),
-            `is`(2131886143))
+            `is`(2131886145))
     }
 
     @After

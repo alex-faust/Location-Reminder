@@ -11,6 +11,7 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
@@ -33,6 +34,7 @@ import com.udacity.project4.databinding.FragmentSelectLocationBinding
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import org.koin.android.ext.android.inject
+import java.util.Locale
 
 
 class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
@@ -43,7 +45,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
     private lateinit var map: GoogleMap
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
 
-
+    @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -51,6 +53,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         binding = DataBindingUtil.inflate(inflater, layoutId, container, false)
         binding.viewModel = _viewModel
         binding.lifecycleOwner = this
+
         val menuHost: MenuHost = requireActivity()
         menuHost.addMenuProvider(
             object : MenuProvider {
@@ -98,18 +101,30 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
         setPoiClick(map)
-
-        fusedLocationProviderClient = LocationServices
-            .getFusedLocationProviderClient(requireActivity())
-        fusedLocationProviderClient.lastLocation.addOnSuccessListener {
-            val location = LatLng(it.latitude, it.longitude)
-            val zoomLevel = 15f
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(location, zoomLevel))
-        }
+        setMapLongClick(map)
         setMapStyle(map)
+
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity())
+        fusedLocationProviderClient.lastLocation.addOnSuccessListener {
+            Log.i(TAG, "fused location success")
+            map.isMyLocationEnabled = true
+
+            map.moveCamera(
+                CameraUpdateFactory.newLatLngZoom(
+                    LatLng(it.latitude, it.longitude), 15f
+                )
+            )
+        }
+        fusedLocationProviderClient.lastLocation.addOnFailureListener {
+            Log.i(TAG, "fused location failure")
+            Toast.makeText(requireContext(),
+                "In order to use location, you need to enable it in the app settings.",
+                Toast.LENGTH_LONG).show()
+        }
     }
 
     private fun setPoiClick(map: GoogleMap) {
+        map.clear()
         map.setOnPoiClickListener { poi ->
             val poiMarker = map.addMarker(
                 MarkerOptions()
@@ -121,36 +136,58 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         }
     }
 
+    private fun setMapLongClick(map: GoogleMap) {
+        map.clear()
+        map.setOnMapLongClickListener { latLng ->
+            val snippet = String.format(
+                Locale.getDefault(),
+                "Lat: %1$.5f, Long: %2$.5f",
+                latLng.latitude,
+                latLng.longitude
+            )
+            map.addMarker(
+                MarkerOptions()
+                    .position(latLng)
+                    .title(getString(R.string.dropped_pin))
+                    .snippet(snippet)
+            )
+            onLocationSelected(PointOfInterest(latLng, getString(R.string.dropped_pin), snippet))
+        }
+    }
+
     private fun setMapStyle(map: GoogleMap) {
         try {
-             val success = map.setMapStyle(
-                 MapStyleOptions.loadRawResourceStyle(
-                     requireContext(), R.raw.map_style
-                 )
-             )
-             if (!success) {
-                 Log.e("TAG", "Style parsing failed")
-             }
-         } catch (e: Resources.NotFoundException) {
-             Log.e("TAG", "Can't find style. Error: ", e)
-         }
+            val success = map.setMapStyle(
+                MapStyleOptions.loadRawResourceStyle(
+                    requireContext(), R.raw.map_style
+                )
+            )
+            if (!success) {
+                Log.e("TAG", "Style parsing failed")
+            }
+        } catch (e: Resources.NotFoundException) {
+            Log.e("TAG", "Can't find style. Error: ", e)
+        }
     }
 
     private fun onLocationSelected(poi: PointOfInterest) {
         _viewModel.reminderSelectedLocationStr.value = poi.name
         _viewModel.latitude.value = poi.latLng.latitude
         _viewModel.longitude.value = poi.latLng.longitude
-        Log.i("find", "adding info")
+        Log.i(TAG, "Location selected")
     }
 
     private fun saveLocation() {
         _viewModel.navigationCommand.value = NavigationCommand.Back
-        Log.i("find", "going back")
     }
-
 
     @RequiresApi(Build.VERSION_CODES.Q)
     override fun onResume() {
         super.onResume()
+    }
+
+    companion object {
+        private const val TAG = "Select Location"
+        private const val REQUEST_CHECK_SETTINGS = 23
     }
 }

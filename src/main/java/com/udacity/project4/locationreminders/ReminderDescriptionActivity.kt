@@ -40,14 +40,6 @@ class ReminderDescriptionActivity : AppCompatActivity() {
 
         val intent = Intent(this, RemindersActivity::class.java)
 
-        /*onBackPressedDispatcher.addCallback(this, object:
-            OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                startActivity(intent)
-            }
-
-        })*/
-
         onBackPressedDispatcher.addCallback(this) {
             startActivity(intent)
         }

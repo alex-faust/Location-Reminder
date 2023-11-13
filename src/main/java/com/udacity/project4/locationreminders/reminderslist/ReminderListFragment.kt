@@ -37,6 +37,9 @@ class ReminderListFragment : BaseFragment() {
             R.layout.fragment_reminders, container, false
         )
         binding.viewModel = _viewModel
+
+        //TODO add code to disable back button on this page
+
         val menuHost: MenuHost = requireActivity()
         menuHost.addMenuProvider(
             object : MenuProvider {
@@ -65,7 +68,7 @@ class ReminderListFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.lifecycleOwner = this
+        binding.lifecycleOwner = viewLifecycleOwner
         setupRecyclerView()
         binding.addReminderFAB.setOnClickListener {
             navigateToAddReminder()

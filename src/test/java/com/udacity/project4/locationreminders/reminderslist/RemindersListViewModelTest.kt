@@ -1,9 +1,9 @@
 package com.udacity.project4.locationreminders.reminderslist
 
-import android.app.Application
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.udacity.project4.locationreminders.MainCoroutineRule
-import com.udacity.project4.locationreminders.data.FakeAndroidTestRepository
+import com.udacity.project4.locationreminders.data.FakeTestRepository
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.getOrAwaitValue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -28,12 +28,12 @@ class RemindersListViewModelTest {
     @get:Rule
     var mainCoroutineRule = MainCoroutineRule()
 
-    private lateinit var remindersRepository: FakeAndroidTestRepository
+    private lateinit var remindersRepository: FakeTestRepository
     private lateinit var remindersListViewModel: RemindersListViewModel
 
     @Before
     fun setupViewModel() {
-        remindersRepository = FakeAndroidTestRepository()
+        remindersRepository = FakeTestRepository()
         val reminder1 = ReminderDTO(
             "Title1",
             "Description1",
@@ -53,7 +53,9 @@ class RemindersListViewModelTest {
             40.0, 40.0
         )
         remindersRepository.addReminders(reminder1, reminder2, reminder3)
-        remindersListViewModel = RemindersListViewModel(Application(), remindersRepository)
+
+        remindersListViewModel = RemindersListViewModel(
+            ApplicationProvider.getApplicationContext(), remindersRepository)
     }
 
     @Test
@@ -76,12 +78,19 @@ class RemindersListViewModelTest {
     }
 
     @Test
-    fun showErrorWhenNoRemindersToLoad() = runTest {
+    fun showReturnErrorWhenNoRemindersToLoad() = runTest {
         remindersListViewModel.loadReminders()
         remindersRepository.deleteAllReminders()
         remindersListViewModel.loadReminders()
 
         assertThat(remindersListViewModel.showNoData.getOrAwaitValue(), `is`(true))
+    }
+
+    @Test
+    fun shouldReturnTestError() = runTest {
+        remindersRepository.setReturnError(true)
+        remindersListViewModel.loadReminders()
+        assertThat(remindersListViewModel.showSnackBar.getOrAwaitValue(), `is`("Test exception"))
     }
 
     @After
